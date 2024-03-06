@@ -75,6 +75,10 @@ public class SettingsFragment extends SettingsBasePreferenceFragment implements 
 
     private Handler mHandler = new Handler();
 
+    private static final String POWERSHARE_ACTIVE = ResourceUtils.getString("glyph_settings_paths_powershare_active_absolute");
+    private static final String POWERSHARE_ENABLED = ResourceUtils.getString("glyph_settings_paths_powershare_enabled_absolute");
+    private static boolean glyphPowershareAvailable = !POWERSHARE_ACTIVE.isBlank() && !POWERSHARE_ENABLED.isBlank();
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.glyph_settings);
@@ -130,7 +134,9 @@ public class SettingsFragment extends SettingsBasePreferenceFragment implements 
         mChargingLevelPreference.setOnPreferenceChangeListener(this);
 
         mChargingPowersharePreference = (SwitchPreferenceCompat) findPreference(Constants.GLYPH_CHARGING_POWERSHARE_ENABLE);
+        mChargingPowersharePreference.setDefaultValue(glyphPowershareAvailable);
         mChargingPowersharePreference.setEnabled(glyphEnabled);
+        mChargingPowersharePreference.setVisible(glyphPowershareAvailable);
         mChargingPowersharePreference.setOnPreferenceChangeListener(this);
 
         mVolumeLevelPreference = (SwitchPreferenceCompat) findPreference(Constants.GLYPH_VOLUME_LEVEL_ENABLE);

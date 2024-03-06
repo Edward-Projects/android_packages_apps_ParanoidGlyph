@@ -39,6 +39,7 @@ import co.aospa.glyph.Services.MusicVisualizerService;
 import co.aospa.glyph.Services.PowershareService;
 import co.aospa.glyph.Services.ThirdPartyService;
 import co.aospa.glyph.Services.VolumeLevelService;
+import co.aospa.glyph.Utils.ResourceUtils;
 
 public final class ServiceUtils {
 
@@ -46,6 +47,10 @@ public final class ServiceUtils {
     private static final boolean DEBUG = true;
 
     private static Context context = Constants.CONTEXT;
+
+    private static final String POWERSHARE_ACTIVE = ResourceUtils.getString("glyph_settings_paths_powershare_active_absolute");
+    private static final String POWERSHARE_ENABLED = ResourceUtils.getString("glyph_settings_paths_powershare_enabled_absolute");
+    private static boolean glyphPowershareAvailable = !POWERSHARE_ACTIVE.isBlank() && !POWERSHARE_ENABLED.isBlank();
 
     public static boolean isNotificationServiceEnabled() {
         String pkgName = context.getPackageName();
@@ -112,6 +117,7 @@ public final class ServiceUtils {
 
     private static void startPowershareService() {
         if (DEBUG) Log.d(TAG, "Starting Glyph powershare service");
+        if (!glyphPowershareAvailable) return;
         context.startServiceAsUser(new Intent(context, PowershareService.class),
                 UserHandle.CURRENT);
     }
