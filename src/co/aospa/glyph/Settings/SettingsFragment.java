@@ -59,6 +59,7 @@ public class SettingsFragment extends SettingsBasePreferenceFragment implements 
     private SeekBarPreference mBrightnessPreference;
     private PrimarySwitchPreference mNotifsPreference;
     private PrimarySwitchPreference mCallPreference;
+    private PreferenceCategory mChargingCategoryPreference;
     private SwitchPreferenceCompat mChargingLevelPreference;
     private SwitchPreferenceCompat mChargingPowersharePreference;
     private SwitchPreferenceCompat mVolumeLevelPreference;
@@ -74,6 +75,9 @@ public class SettingsFragment extends SettingsBasePreferenceFragment implements 
     private Preference mSchedulePreference;
 
     private Handler mHandler = new Handler();
+
+    private static final int CHARGING_LEVELS = ResourceUtils.getInteger("glyph_settings_battery_levels_num");
+    private static boolean glyphChargingMeterAvailable = CHARGING_LEVELS > 0;
 
     private static final String POWERSHARE_ACTIVE = ResourceUtils.getString("glyph_settings_paths_powershare_active_absolute");
     private static final String POWERSHARE_ENABLED = ResourceUtils.getString("glyph_settings_paths_powershare_enabled_absolute");
@@ -129,8 +133,13 @@ public class SettingsFragment extends SettingsBasePreferenceFragment implements 
         mCallPreference.setSwitchEnabled(glyphEnabled);
         mCallPreference.setOnPreferenceChangeListener(this);
 
+        mChargingCategoryPreference = (PreferenceCategory) findPreference(Constants.GLYPH_CHARGING_CATEGORY);
+        mChargingCategoryPreference.setVisible(glyphChargingMeterAvailable || glyphPowershareAvailable);
+
         mChargingLevelPreference = (SwitchPreferenceCompat) findPreference(Constants.GLYPH_CHARGING_LEVEL_ENABLE);
+        mChargingLevelPreference.setDefaultValue(glyphChargingMeterAvailable);
         mChargingLevelPreference.setEnabled(glyphEnabled);
+        mChargingLevelPreference.setVisible(glyphChargingMeterAvailable);
         mChargingLevelPreference.setOnPreferenceChangeListener(this);
 
         mChargingPowersharePreference = (SwitchPreferenceCompat) findPreference(Constants.GLYPH_CHARGING_POWERSHARE_ENABLE);
