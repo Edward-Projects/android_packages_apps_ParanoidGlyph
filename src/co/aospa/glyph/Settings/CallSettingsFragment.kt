@@ -1,0 +1,86 @@
+/*
+ * Copyright (C) 2022-2024 Paranoid Android
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package co.aospa.glyph.Settings
+
+import android.os.Bundle
+import co.aospa.glyph.Constants.Constants
+import co.aospa.glyph.Manager.SettingsManager
+
+class CallSettingsFragment : SettingsBasePreferenceFragment(), OnPreferenceChangeListener,
+    OnCheckedChangeListener {
+    private var mScreen: PreferenceScreen? = null
+
+    private var mSwitchBar: MainSwitchPreference? = null
+
+    private var mListPreference: ListPreference? = null
+
+    private var mGlyphAnimationPreference: GlyphAnimationPreference? = null
+
+    private val mHandler: Handler = Handler()
+
+    public override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        addPreferencesFromResource(R.xml.glyph_call_settings)
+
+        mScreen = this.getPreferenceScreen()
+        getActivity().setTitle(R.string.glyph_settings_call_toggle_title)
+
+        mSwitchBar = findPreference(Constants.GLYPH_CALL_SUB_ENABLE) as MainSwitchPreference
+        mSwitchBar.addOnSwitchChangeListener(this)
+        mSwitchBar.setChecked(SettingsManager.isGlyphCallEnabled())
+
+        mListPreference = findPreference(Constants.GLYPH_CALL_SUB_ANIMATIONS) as ListPreference
+        mListPreference.setOnPreferenceChangeListener(this)
+        mListPreference.setEntries(ResourceUtils.getCallAnimations())
+        mListPreference.setEntryValues(ResourceUtils.getCallAnimations())
+        if (!ArrayUtils.contains(ResourceUtils.getCallAnimations(), mListPreference.getValue())) {
+            mListPreference.setValue(ResourceUtils.getString("glyph_settings_call_animations_default"))
+        }
+
+        mGlyphAnimationPreference =
+            findPreference(Constants.GLYPH_CALL_SUB_PREVIEW) as GlyphAnimationPreference
+    }
+
+    public override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        mGlyphAnimationPreference.updateAnimation(
+            SettingsManager.isGlyphCallEnabled(),
+            SettingsManager.getGlyphCallAnimation()
+        )
+    }
+
+    public override fun onPreferenceChange(preference: Preference, newValue: Any): Boolean {
+        val preferenceKey: String = preference.getKey()
+
+        if (preferenceKey == Constants.GLYPH_CALL_SUB_ANIMATIONS) {
+            mGlyphAnimationPreference.updateAnimation(
+                SettingsManager.isGlyphCallEnabled(),
+                newValue.toString()
+            )
+        }
+
+        //mHandler.post(() -> ServiceUtils.checkGlyphService());
+        return true
+    }
+
+    public override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
+        SettingsManager.setGlyphCallEnabled(isChecked)
+        ServiceUtils.checkGlyphService()
+        mGlyphAnimationPreference.updateAnimation(
+            isChecked,
+            SettingsManager.getGlyphCallAnimation()
+        )
+    }
+}
